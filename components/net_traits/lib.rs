@@ -448,6 +448,7 @@ pub struct ResourceFetchTiming {
     pub redirect_count: u16,
     pub request_start: u64,
     pub response_start: u64,
+    pub start_time: u64,
     pub fetch_start: u64,
     pub response_end: u64,
     pub redirect_start: u64,
@@ -467,6 +468,7 @@ pub enum ResourceAttribute {
     RequestStart,
     ResponseStart,
     RedirectStart(RedirectStartValue),
+    StartTime,
     FetchStart,
     ConnectStart(u64),
     ConnectEnd(u64),
@@ -489,6 +491,7 @@ impl ResourceFetchTiming {
             request_start: 0,
             response_start: 0,
             fetch_start: 0,
+            start_time: 0,
             redirect_start: 0,
             connect_start: 0,
             connect_end: 0,
@@ -511,16 +514,11 @@ impl ResourceFetchTiming {
                     }
                 },
             },
+            ResourceAttribute::StartTime => self.start_time = precise_time_ns(),
             ResourceAttribute::FetchStart => self.fetch_start = precise_time_ns(),
-            ResourceAttribute::ConnectStart(val) => self.connect_start = val,
-            ResourceAttribute::ConnectEnd(val) => self.connect_end = val,
-            ResourceAttribute::ResponseEnd => self.response_end = precise_time_ns(),
-        }
     }
-}
 
-/// Metadata about a loaded resource, such as is obtained from HTTP headers.
-#[derive(Clone, Debug, Deserialize, MallocSizeOf, Serialize)]
+    pub fn set_attribute_from(&mut self, attribute: ResourceAttribute, from: ResourceAttribute) {
 pub struct Metadata {
     /// Final URL after redirects.
     pub final_url: ServoUrl,

@@ -537,8 +537,6 @@ pub fn http_fetch(
         // Generally, we use a persistent connection, so we will also set other PerformanceResourceTiming
         //   attributes to this as well (domain_lookup_start, domain_lookup_end, connect_start, connect_end,
         //   secure_connection_start)
-        // TODO(#21254) also set startTime equal to either fetch_start or redirect_start
-        //   (https://w3c.github.io/resource-timing/#dfn-starttime)
         context
             .timing
             .lock()
@@ -674,6 +672,13 @@ pub fn http_redirect_fetch(
         .set_attribute(ResourceAttribute::RedirectStart(
             RedirectStartValue::FetchStart,
         ));
+
+    context
+        .timing
+        .lock()
+        .unwrap()
+        .set_attribute_from(ResourceAttribute::StartTime,
+                            ResourceAttribute::RedirectStart(RedirectStartValue::Zero));
 
     context
         .timing
